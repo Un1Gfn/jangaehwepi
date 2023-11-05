@@ -1,7 +1,7 @@
 #!/bin/zsh
 
 source /usr/local/share/homebrew/compat.zshrc
-source jangaehwepi.zshrc
+source ~/jangaehwepi/jangaehwepi.zshrc
 
 cat <<EOF >/tmp/trojan.json
 {
