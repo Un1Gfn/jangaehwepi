@@ -44,3 +44,9 @@ ruamel.yaml.YAML().dump(...)
 
 # self.wfile.write(DEBUG_JSON.encode())
 
+
+from urllib.parse import urlparse, urlsplit
+U1 = "http://1.2.3.4/x/y/z/?q=nnn&f1=k&t1=j#g"
+U2 = "http://1.2.3.4/x/y/z?q=nnn&f1=k&t1=j#g"
+print(urlparse(U1))
+print(urlparse(U2))

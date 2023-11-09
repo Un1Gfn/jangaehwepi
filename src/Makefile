@@ -5,7 +5,11 @@ MAKEFLAGS:=-j2
 default: api ui
 
 api:
-	cd backend; ./api.py 0.0.0.0 6081
+	cd backend; ./main.py 0.0.0.0 6081
 
 ui:
-	busybox httpd -f -vv -p 0.0.0.0:6080 -h frontend/
+	cd frontend; busybox httpd -f -vv -p 0.0.0.0:6080 -h .
+
+# https://datatables.net/download/
+download:
+	cd frontend/external/; ./download.zsh

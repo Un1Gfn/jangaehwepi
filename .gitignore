@@ -1,10 +1,9 @@
 trojan*txt
 clash*yaml
-jquery.js
-jquery.dataTables.js
-jquery.dataTables.css
-dataTables.select.js
-select.dataTables.css
+
+jquery*.js
+dataTables*.js
+*dataTables.css
 
 *.png
 *.ico

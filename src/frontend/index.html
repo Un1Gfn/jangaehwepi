@@ -1,15 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>jangaehwepi</title>
+
     <link href="style.css" rel="stylesheet">
+
     <link href="external/jquery.dataTables.css" rel="stylesheet">
+    <link href="external/buttons.dataTables.css" rel="stylesheet">
     <link href="external/select.dataTables.css" rel="stylesheet">
+
     <script src="external/jquery.js"></script>
     <script src="external/jquery.dataTables.js"></script>
+    <script src="external/dataTables.buttons.js"></script>
     <script src="external/dataTables.select.js"></script>
+
+    <script src="conf.js"></script>
+
   </head>
   <body>
     <table id="tb_nodes" class="display">
@@ -23,8 +32,15 @@
       </thead>
       <tbody>
       </tbody>
+      <tfoot>
+        <tr>
+          <th>I<sup>[&alpha;]</sup></th>
+          <th>L</th>
+          <th>N</th>
+          <th>A</th>
+        </tr>
+      </tfoot>
     </table>
     <p>[&alpha;] According to the original order in subscription</p>
-    <script src="conf.js"></script>
   </body>
 </html>

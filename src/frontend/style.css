@@ -4,7 +4,7 @@ body {
 
 td {
   font-family: sans-serif;
-  /* white-space: nowrap; */
+  white-space: nowrap;
 }
 
 td:nth-child(2) {
@@ -14,4 +14,8 @@ td:nth-child(2) {
 
 td:nth-child(2):after {
   content: " ms";
+}
+
+table {
+  width: 90%;
 }

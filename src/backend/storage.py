@@ -1,4 +1,4 @@
-#!/bin/env python3
+#!/dev/null
 
 import json
 from ruamel.yaml import YAML
