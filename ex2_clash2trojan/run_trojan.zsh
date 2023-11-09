@@ -14,6 +14,7 @@ cat <<EOF >/tmp/trojan.json
       "`decrypt yV7OC7hIOeKO5MSAHrMFxAfrTGHpUr/lsgcwY7Wttb1SqjOAulxMVZTjI/RW+ja3AhEnhhtbFy9Th8MDa0LyhFXewQI+iMhP2P0VxMSlSt87ngjLHtwuk9bmj1m/bCWgNPYqmYg71dBOQEa6OZk+eWfMpZ2TNVye9dGAvJJExFSBxjf2CMyhNlZyF/YjdJbBBPRYCWSwPi09Psgtm6UzJnxlcygZ5WqdQWpW7geWYpvxxfRxhENfSNW2J6aNJFJur4FIAJPSIsQPp1PruHBabVMHCzaeP0l3Isln4GcKV5g06eQ2xola18ndaCydCDjd2uIwuGBp7KjbIWQm3IE6Jg==`"
   ],
   "log_level": 1,
+  "log_file": "/tmp/trojan-go.log",
   "ssl": {
       "verify": false,
       "verify_hostname": false,
@@ -37,4 +38,4 @@ cat <<EOF >/tmp/trojan.json
 }
 EOF
 
-trojan-go -config /tmp/trojan.json
+trojan-go -config /tmp/trojan.json >/dev/null 2>&1 &

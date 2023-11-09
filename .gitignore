@@ -5,3 +5,6 @@ jquery.dataTables.js
 jquery.dataTables.css
 dataTables.select.js
 select.dataTables.css
+
+*.png
+*.ico

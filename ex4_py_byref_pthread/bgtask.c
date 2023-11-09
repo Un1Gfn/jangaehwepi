@@ -13,7 +13,6 @@ void *sr(void *pv){
   const useconds_t MX=1900;
   const useconds_t Mn=1;
   for(;;){
-    // sleep(1);
     useconds_t ms=Mn+random()%(MX+1-Mn);
     usleep(ms*1000);
     *pn=ms;
@@ -22,9 +21,6 @@ void *sr(void *pv){
 }
 
 void bgtask(int *arg){
-// void bgtask(){
-
-  // assert(0);
 
   pthread_attr_t ta={};
   assert(0==pthread_attr_init(&ta));
