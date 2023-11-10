@@ -6,6 +6,8 @@ from sys import stdout
 from copy import deepcopy
 from pprint import pprint
 
+# store everything in a big serializable dict
+# save to persistant storage on exit
 storage = {
     'active': -1,
     'nodes': [ ]
@@ -19,7 +21,6 @@ def loadconf():
     id = 0
     for p in from_yaml['proxies']:
         n = {
-            'id': id,
             'name': "",
             'conf': deepcopy(default_conf)
         }
@@ -35,17 +36,4 @@ def loadconf():
                 case 'port':             n['conf']['remote_port'] = v
                 case 'password':         n['conf']['password'] = [ v ]
                 case _:                  print(f"unknown field ['{k}']: \"{v}\""); raise RuntimeError
-        # print(json.dumps(n['conf']))
         storage['nodes'].append(n)
-        # if id > 3:
-        #     breakpoint()
-
-if __name__ == "__main__":
-    load()
-    # from code import interact
-    # interact(local=locals())
-    from pprint import pprint
-    # pprint(storage)
-    data = [ [ n['id'], n['name'], -1, "" ] for n in storage['nodes'] ]
-    pprint(data)
-    breakpoint()

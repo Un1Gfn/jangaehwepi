@@ -6,4 +6,4 @@
 
 # cd /tmp
 # cd /RSYNC
-cd /RSYNC/jangaehwepi@820g3
+cd /RSYNC/jangaehwepi@820g3/src

@@ -41,7 +41,7 @@ class AjaxRequestHandler(BaseHTTPRequestHandler):
                 data = {
                     'active': storage['active'],
                     'nodes': [
-                        [ n['id'], -1, n['name'], "" ] for n in storage['nodes']
+                        [ id, -1, node['name'], "" ] for (id, node) in enumerate(storage['nodes'])
                     ]
                 }
                 self.wfile.write(json.dumps(data).encode())
@@ -54,8 +54,11 @@ class AjaxRequestHandler(BaseHTTPRequestHandler):
                     if storage['active'] >= 0:
                         self.send_error(400, "E_DUP")
                     else:
-                        trojan.activate()
-                        self.send_response(200, "activated node ???"); self.end_headers()
+                        id = int(ss[1])
+                        assert id >= 0
+                        trojan.activate(id)
+                        storage['active'] = id
+                        self.send_response(200, f"activated node {id}"); self.end_headers()
                 else:
                     self.send_error(404, "E_INVALID", f'request "{urlparse(self.path)}" not implemented')
                     print(urlparse(self.path))

@@ -11,41 +11,57 @@ API = "http://192.168.0.223:6081";
 
 $(document).ready(function(){
 
-  var table = new DataTable('#tb_nodes', {
+  function req(u){
+    let request = new XMLHttpRequest();
+    request.open("GET", u, async=false);
+    request.send(null);
+    return request.responseText;
+  }
+
+  // let id = document.getElementById.bind(document);
+  function id(i){
+    return document.getElementById(i);
+  }
+
+  function reload(){
+    location.reload(true);
+  }
+
+  function f_deactivate(){
+    req(`${API}/g_deactivate`);
+  }
+
+  // active node
+  let j = JSON.parse(req(`${API}/g_list`));
+  id("id_active").value = `active = ${j.active}`;
+
+  // deactivate button
+  id("id_b_deactivate").onclick = function(){
+    f_deactivate();
+    reload();
+  };
+
+  // render table
+  let table = new DataTable('#id_table', {
     info: true,
     ordering: true,
     paging: false,
     dom: 'Bf',
-    ajax: {
-      url: API + "/g_list",
-      dataSrc: "nodes",
-      cache: false, // "_={timestamp}" in GET
-    },
+    data: j.nodes,
     columns: [
       { data: 0,    width: "1em",  type: "num", },
       { data: 1,    width: "5em",  type: "num", },
       { data: 2,    width: "auto" },
-      { data: null, width: "5em",  defaultContent: "<button>ACTIVATE</button>", orderable: false }
-    ],
-    buttons: [
-      {
-        text: 'DEACTIVATE',
-        action: function(e, dt, node, config){
-          console.log(`${API}/g_deactivate`);
-          $.get(`${API}/g_deactivate`, function(data) {
-            console.log(data);
-          });
-        }
-      }
+      { data: null, width: "2em",  defaultContent: "<button class='c_b_activate'>&nbsp;</button>", orderable: false }
     ]
   });
 
+  // activate button
   table.on('click', 'button', function(e){
+    f_deactivate();
     let data = table.row(e.target.closest('tr')).data();
-    console.log(`${API}/g_activate/${data[0]}`);
-    $.get(`${API}/g_activate/${data[0]}`, function(data) {
-      console.log(data);
-    });
+    req(`${API}/g_activate/${data[0]}`);
+    reload();
   });
 
 })
