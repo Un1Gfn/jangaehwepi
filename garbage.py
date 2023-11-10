@@ -62,3 +62,6 @@ if __name__ == "__main__":
 
 print(json.dumps(d))
 json.dump(d, sys.stdout)
+
+print(getcwd())
+print(environ['PWD'])

@@ -23,22 +23,19 @@ $(document).ready(function(){
     return document.getElementById(i);
   }
 
-  function reload(){
-    location.reload(true);
-  }
-
-  function f_deactivate(){
-    req(`${API}/g_deactivate`);
-  }
-
   // active node
   let j = JSON.parse(req(`${API}/g_list`));
   id("id_active").value = `active = ${j.active}`;
 
   // deactivate button
-  id("id_b_deactivate").onclick = function(){
-    f_deactivate();
-    reload();
+  id("id_deactivate").onclick = function(){
+    req(`${API}/g_deactivate`);
+    location.reload(true);
+  };
+
+  id("id_update").onclick = function(){
+    req(`${API}/g_update`);
+    location.reload(true);
   };
 
   // render table
@@ -52,16 +49,17 @@ $(document).ready(function(){
       { data: 0,    width: "1em",  type: "num", },
       { data: 1,    width: "5em",  type: "num", },
       { data: 2,    width: "auto" },
-      { data: null, width: "2em",  defaultContent: "<button class='c_b_activate'>&nbsp;</button>", orderable: false }
+      { data: null, width: "2em",  defaultContent: "<button class='c_rowbutton'>&nbsp;</button>", orderable: false },
+      { data: null, width: "2em",  defaultContent: "<button class='c_rowbutton'>&nbsp;</button>", orderable: false }
     ]
   });
 
   // activate button
   table.on('click', 'button', function(e){
-    f_deactivate();
+    req(`${API}/g_deactivate`);
     let data = table.row(e.target.closest('tr')).data();
     req(`${API}/g_activate/${data[0]}`);
-    reload();
+    location.reload(true);
   });
 
 })
