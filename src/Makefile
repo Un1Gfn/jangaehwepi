@@ -12,9 +12,11 @@ sanitycheck:
 	@echo
 	@ls -X1 ./backend
 	@echo
+	@file backend/storage.json; true
+	@file backend/blacklist.json; true
+	@echo
 
 both:
-	# rm -v backend/storage.json
 	cd backend; ./main.py -a 0.0.0.0 -f 6080 -b 6081
 
 # https://datatables.net/download/

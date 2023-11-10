@@ -7,19 +7,55 @@
 import json
 from ruamel.yaml import YAML
 from copy import deepcopy
+from os.path import isfile
 
 # store everything in a big serializable dict
 # save to persistant storage on exit
+
+blacklist = [
+
+]
+
 storage = {
     'active': -1,
-    'nodes': [ ],
-    'blacklist': [ ]
+    'nodes': [ ]
 }
 
+def add_blacklist(id):
+    c = storage['nodes'][id]['conf']
+    blacklist.append({
+        'remote_addr': c['remote_addr'],
+        'remote_port': c['remote_port']
+    })
+    with open("blacklist.json", 'w') as f:
+        json.dump(blacklist, f, ensure_ascii=True, indent="  ")
+
+def list():
+    d = {
+        'active': storage['active'],
+        'list1': [ ],
+        'list2': [ ]
+    }
+    for (i, n) in enumerate(storage['nodes']):
+        if not any([ b.items() <= n['conf'].items() for b in blacklist ]):
+            d['list1'].append([ i, n['name'], -1 ])
+        else:
+            d['list2'].append([ i, n['name'] ])
+
+    return d
+
 def load():
+    global blacklist
+    if isfile("blacklist.json"):
+        with open("blacklist.json", 'r') as f:
+            blacklist = json.load(f)
     global storage
-    with open("storage.json", 'r') as f:
-        storage = json.load(f)
+    if isfile("storage.json"):
+        with open("storage.json", 'r') as f:
+            storage = json.load(f)
+    else:
+        from_clash()
+        save()
 
 def save():
     with open("storage.json", 'w') as f:

@@ -23,23 +23,28 @@
   </head>
   <body>
 
-    <button id="id_deactivate">D</button>
-    <input type="text" id="id_active" name="nm_active" value="v_active" disabled>
-    <br>
+    <p id="id_headnote">
+      [A] activate node <br>
+      [B] blacklist node <br>
+      [I] id according to the original order in subscription <br>
+      [U] upload clash yml <br>
+      [W] remove from blacklist <br>
+      <br>
 
-    <br>
+      <button id="id_deactivate">D</button>&nbsp;
+      <input type="text" id="id_active" value="v_xei2is" disabled><br>
+      <br>
 
-    <button id="id_update">U</button>
-    <br>
+      <button id="id_update">U</button><br>
+      <br>
+    </p>
 
-    <br>
-
-    <table id="id_table" class="display">
+    <table id="id_table1" class="display">
       <thead>
         <tr>
-          <th>I<sup>[&alpha;]</sup></th>
+          <th>I</th>
           <th>L</th>
-          <th>N</th>
+          <th></th>
           <th>A</th>
           <th>B</th>
         </tr>
@@ -48,14 +53,35 @@
       </tbody>
       <tfoot>
         <tr>
-          <th>I<sup>[&alpha;]</sup></th>
+          <th>I</th>
           <th>L</th>
-          <th>N</th>
+          <th></th>
           <th>A</th>
           <th>B</th>
         </tr>
       </tfoot>
     </table>
-    <p>[&alpha;] According to the original order in subscription</p>
+
+    <br>
+
+    <table id="id_table2" class="display">
+      <thead>
+        <tr>
+          <th>I</th>
+          <th>W</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+      </tbody>
+      <tfoot>
+        <tr>
+          <th>I</th>
+          <th>W</th>
+          <th></th>
+        </tr>
+      </tfoot>
+    </table>
+
   </body>
 </html>

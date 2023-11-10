@@ -24,41 +24,70 @@ $(document).ready(function(){
   }
 
   // active node
-  let j = JSON.parse(req(`${API}/g_list`));
+  j = JSON.parse(req(`${API}/g_list/`));
   id("id_active").value = `active = ${j.active}`;
 
   // deactivate button
   id("id_deactivate").onclick = function(){
-    req(`${API}/g_deactivate`);
+    req(`${API}/g_deactivate/`);
     location.reload(true);
   };
 
   id("id_update").onclick = function(){
-    req(`${API}/g_update`);
+    req(`${API}/g_update/`);
     location.reload(true);
   };
 
   // render table
-  let table = new DataTable('#id_table', {
+  let table1 = new DataTable('#id_table1', {
     info: true,
     ordering: true,
     paging: false,
     dom: 'Bf',
-    data: j.nodes,
+    data: j.list1,
     columns: [
       { data: 0,    width: "1em",  type: "num", },
-      { data: 1,    width: "5em",  type: "num", },
-      { data: 2,    width: "auto" },
-      { data: null, width: "2em",  defaultContent: "<button class='c_rowbutton'>&nbsp;</button>", orderable: false },
-      { data: null, width: "2em",  defaultContent: "<button class='c_rowbutton'>&nbsp;</button>", orderable: false }
+      { data: 2,    width: "5em",  type: "num", },
+      { data: 1,    width: "auto" },
+      { data: null, width: "2em",  defaultContent: "<button class='c_activate'>&nbsp;</button>", orderable: false },
+      { data: null, width: "2em",  defaultContent: "<button class='c_blacklist'>&nbsp;</button>", orderable: false }
     ]
   });
 
   // activate button
-  table.on('click', 'button', function(e){
-    req(`${API}/g_deactivate`);
-    let data = table.row(e.target.closest('tr')).data();
-    req(`${API}/g_activate/${data[0]}`);
+  table1.on('click', 'button', function(e){
+    let data = table1.row(e.target.closest('tr')).data();
+    switch($(this).attr('class')){
+      case "c_blacklist":
+        req(`${API}/g_blacklist/${data[0]}`);
+        location.reload(true);
+        break;
+      case "c_activate":
+        req(`${API}/g_activate/${data[0]}`);
+        location.reload(true);
+        break;
+      default:
+        alert("err lt4tf5")
+        break;
+    }
+  });
+
+  let table2 = new DataTable('#id_table2', {
+    info: false,
+    ordering: false,
+    paging: false,
+    dom: '',
+    data: j.list2,
+    columns: [
+      { data: 0,    width: "1em",  type: "num", },
+      { data: null, width: "2em",  defaultContent: "<button class='c_allow'>&nbsp;</button>", orderable: false },
+      { data: 1,    width: "auto" },
+    ]
+  });
+
+  table2.on('click', 'button', function(e){
+    let data = table2.row(e.target.closest('tr')).data();
+    req(`${API}/g_allow/${data[0]}`);
     location.reload(true);
   });
 

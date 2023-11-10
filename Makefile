@@ -17,8 +17,8 @@ rsync:
 ssh:
 	ssh root@820g3 -t sudo -u rsync /bin/bash --rcfile /RSYNC/jangaehwepi@820g3/ssh.bashrc || true
 
-# clean:
-# 	./rsync.zsh --delete . rsync://820g3/hudrpl/jangaehwepi@820g3
+clean:
+	./rsync.zsh --delete . rsync://820g3/hudrpl/jangaehwepi@820g3
 
 # delete files but keep directory structure to avoid "cd $PWD"
 skeleton:
