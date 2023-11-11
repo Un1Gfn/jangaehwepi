@@ -1,9 +1,13 @@
 #!/bin/env python3
 
-from argparse import ArgumentParser
+from hashlib import sha1
 from http.server import HTTPServer, BaseHTTPRequestHandler, SimpleHTTPRequestHandler
+from io import BytesIO
+from lnk_conf import *
+from multipart import multipart, parse_form
 from os import environ
-from os.path import isfile, split
+from os.path import split
+from pathlib import Path
 from threading import Thread
 from urllib.parse import urlparse
 import json
@@ -16,13 +20,10 @@ class FrontendHTTPRequestHandler(SimpleHTTPRequestHandler):
     def log_message(self, format, *args):
         pass
 
-def frontend(parsed):
-    HTTPServer((parsed.a, int(parsed.f)), FrontendHTTPRequestHandler).serve_forever()
+def frontend():
+    HTTPServer((FRONTEND_ADDR, FRONTEND_PORT,), FrontendHTTPRequestHandler).serve_forever()
 
 class BackendHTTPRequestHandler(BaseHTTPRequestHandler):
-
-    # def log_message(self, format, *args):
-    #     pass
 
     def end_headers(self):
         self.send_header('Access-Control-Allow-Origin', '*')
@@ -32,6 +33,50 @@ class BackendHTTPRequestHandler(BaseHTTPRequestHandler):
         self.send_response(200)
         self.end_headers()
 
+    def on_field(self, field):
+        assert False
+
+    def on_file(self, file):
+
+        assert type(file) == multipart.File
+        assert type(file.file_object) == BytesIO
+        assert file.actual_file_name == None
+        assert len(file.file_name) > 0
+        assert file.field_name.decode() == "fd_file"
+        assert file.size > 0
+        print(f"{file.size} bytes")
+
+        b = file.file_object.getvalue()
+        assert type(b) == bytes
+        assert len(b) == file.size
+        print(sha1(b).digest().hex())
+
+        assert Path(file.file_name.decode()).suffix in [ ".list", ".yaml", ".yml", ".conf", ".txt" ]
+        with open("clash.yaml", 'wb') as f:
+            f.write(b)
+
+    def mfd(self):
+        ct = self.headers.get('Content-Type')
+        cl = int(self.headers.get('Content-Length'))
+        assert ct.startswith("multipart/form-data")
+        assert cl >= 1
+        mfd = multipart.FormParser.DEFAULT_CONFIG
+        assert 'MAX_MEMORY_FILE_SIZE' in mfd
+        mfd['MAX_MEMORY_FILE_SIZE'] = 128*1024*1024
+        parse_form({
+            'Content-Type': ct,
+            'Content-Length': cl
+        }, self.rfile, self.on_field, self.on_file)
+
+    def do_POST(self):
+        assert self.path == "/g_upload/"
+        self.mfd()
+        if storage.storage['active'] >= 0:
+            trojan.deactivate()
+        storage.storage_from_clash()
+        storage.storage_save()
+        self.success()
+
     def do_GET(self):
 
         p = split(urlparse(self.path).path)
@@ -39,13 +84,6 @@ class BackendHTTPRequestHandler(BaseHTTPRequestHandler):
 
             case "/":
                 self.send_error(400, "E_NOROOT")
-
-            case "/g_update":
-                if storage.storage['active'] >= 0:
-                    trojan.deactivate()
-                storage.from_clash()
-                storage.save()
-                self.success()
 
             case "/g_deactivate":
                 if storage.storage['active'] >= 0:
@@ -62,15 +100,18 @@ class BackendHTTPRequestHandler(BaseHTTPRequestHandler):
                 assert id >= 0
                 trojan.activate(id)
                 storage.storage['active'] = id
-                storage.save()
+                storage.storage_save()
                 self.success()
 
-            case "/g_blacklist":
-                storage.add_blacklist(int(p[1]))
-                print("add_blacklist()")
+            case "/g_ban":
+                storage.blacklist_append(int(p[1]))
                 self.success()
 
-            case "/g_list":
+            case "/g_allow":
+                storage.blacklist_remove(int(p[1]))
+                self.success()
+
+            case "/g_pull":
                 self.send_response(200, "listing nodes ...")
                 self.send_header('Content-type', 'application/json')
                 self.end_headers()
@@ -87,16 +128,13 @@ if __name__ == "__main__":
     if any([ e in environ for e in ban_env ]):
         raise RuntimeError
 
-    parser = ArgumentParser()
-    parser.add_argument("-a")
-    parser.add_argument("-f")
-    parser.add_argument("-b")
-    parsed = parser.parse_args()
-
-    storage.load()
+    storage.init()
     id = storage.storage['active']
     if id >= 0:
         trojan.activate(id)
 
-    Thread(target=frontend, args=(parsed,)).start()
-    HTTPServer((parsed.a, int(parsed.b)), BackendHTTPRequestHandler).serve_forever()
+    # frontend
+    Thread(target=frontend).start()
+
+    # backend
+    HTTPServer((BACKEND_ADDR, BACKEND_PORT,), BackendHTTPRequestHandler).serve_forever()

@@ -1,0 +1,21 @@
+# systemd.unit(5)
+# systemd.service(5)
+# systemd.exec(5)
+
+[Unit]
+Description=WSGI Clash Monitor
+After=network.target
+After=sys-subsystem-net-devices-enp0s31f6.device
+BindsTo=sys-subsystem-net-devices-enp0s31f6.device
+
+[Service]
+User=rsync
+Group=rsync
+Type=exec
+Restart=on-failure
+RestartSec=3s
+WorkingDirectory=/RSYNC/jangaehwepi@820g3/src/backend
+ExecStart=/usr/bin/python3 main.py
+
+[Install]
+WantedBy=default.target

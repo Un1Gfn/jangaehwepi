@@ -7,8 +7,6 @@
 // https://datatables.net/reference/option/dom
 // https://datatables.net/extensions/buttons/
 
-API = "http://192.168.0.223:6081";
-
 $(document).ready(function(){
 
   function req(u){
@@ -24,7 +22,7 @@ $(document).ready(function(){
   }
 
   // active node
-  j = JSON.parse(req(`${API}/g_list/`));
+  j = JSON.parse(req(`${API}/g_pull/`));
   id("id_active").value = `active = ${j.active}`;
 
   // deactivate button
@@ -33,8 +31,16 @@ $(document).ready(function(){
     location.reload(true);
   };
 
+  id("id_yaml").href = SUBSCRIPTION;
+
   id("id_update").onclick = function(){
-    req(`${API}/g_update/`);
+
+    let f = new FormData();
+    f.append("fd_file", id("id_file").files[0]);
+
+    let request = new XMLHttpRequest();
+    request.open("POST", `${API}/g_upload/`, async=false);
+    request.send(f);
     location.reload(true);
   };
 
@@ -59,7 +65,7 @@ $(document).ready(function(){
     let data = table1.row(e.target.closest('tr')).data();
     switch($(this).attr('class')){
       case "c_blacklist":
-        req(`${API}/g_blacklist/${data[0]}`);
+        req(`${API}/g_ban/${data[0]}`);
         location.reload(true);
         break;
       case "c_activate":

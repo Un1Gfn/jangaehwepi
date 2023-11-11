@@ -65,3 +65,13 @@ json.dump(d, sys.stdout)
 
 print(getcwd())
 print(environ['PWD'])
+
+parser = ArgumentParser()
+parser.add_argument("-a")
+parser.add_argument("-f")
+parser.add_argument("-b")
+parsed = parser.parse_args()
+
+class BackendHTTPRequestHandler(BaseHTTPRequestHandler):
+    def log_message(self, format, *args):
+        pass

@@ -1,8 +1,12 @@
 #!/dev/null
 
-# this file is automatically rsync'ed to 820G3
+# this file is rsynced to 820G3
+# do not edit
 
-# load this file with "bash --rcfile" when invoking "make ssh"
+# invocation: "make ssh " => "bash --rcfile"
+
+export HISTSIZE=-1
+export HISTFILESIZE=-1
 
 # cd /tmp
 # cd /RSYNC

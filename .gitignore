@@ -5,5 +5,8 @@ jquery*.js
 dataTables*.js
 *dataTables.css
 
+lnk*py
+lnk*js
+
 *.png
 *.ico

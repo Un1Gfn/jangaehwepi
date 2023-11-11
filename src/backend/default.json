@@ -1,7 +1,7 @@
 {
   "run_type": "client",
-  "local_addr": "127.0.0.1",
-  "local_port": 1080,
+  "local_addr": "",
+  "local_port": -1,
   "remote_addr": "",
   "remote_port": -1,
   "password": [
@@ -19,7 +19,7 @@
         "h2",
         "http/1.1"
     ],
-    "reuse_session": true,
+    "reuse_session": false,
     "session_ticket": true,
     "curves": ""
   },

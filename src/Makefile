@@ -1,23 +1,25 @@
 $(info please run this Makefile on Linux)
 
-MAKEFLAGS:=-j2
+MAKEFLAGS:=-j1
 
 default:
-	$(MAKE) sanitycheck
-	$(MAKE) both
+	./mklnk.zsh
+	rm -fv backend/active.json
+	rm -fv backend/blacklist.json
+	rm -fv backend/clash.yaml
+	rm -fv backend/storage.json
+	$(MAKE) run
 
-sanitycheck:
-	@echo
-	ps aux | grep -i -e trojan -e httpd
-	@echo
-	@ls -X1 ./backend
-	@echo
-	@file backend/storage.json; true
-	@file backend/blacklist.json; true
-	@echo
+run:
+	cd backend; ./main.py
 
-both:
-	cd backend; ./main.py -a 0.0.0.0 -f 6080 -b 6081
+status:
+	{ \
+	  cd backend; \
+	  file blacklist.json; cat $$_; echo; echo; \
+	  file active.json; cat $$_; echo; echo; \
+	  file storage.json; cat $$_ echo; echo; \
+	} | less -SRM +%
 
 # https://datatables.net/download/
 download:

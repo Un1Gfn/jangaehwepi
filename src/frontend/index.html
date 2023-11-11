@@ -18,12 +18,14 @@
     <script src="external/dataTables.buttons.js"></script>
     <script src="external/dataTables.select.js"></script>
 
-    <script src="conf.js"></script>
+    <script src="script.js"></script>
+    <script src="lnk_conf.js"></script>
 
   </head>
   <body>
 
     <p id="id_headnote">
+
       [A] activate node <br>
       [B] blacklist node <br>
       [I] id according to the original order in subscription <br>
@@ -31,12 +33,16 @@
       [W] remove from blacklist <br>
       <br>
 
-      <button id="id_deactivate">D</button>&nbsp;
-      <input type="text" id="id_active" value="v_xei2is" disabled><br>
-      <br>
+      <!-- POST enctype="multipart/form-data" -->
+      <button id="id_update">U</button>&nbsp;
+      <a id="id_yaml">YAML</a>
+      <input type="file" id="id_file" name="arq3v3"/>
+      <br><br>
 
-      <button id="id_update">U</button><br>
-      <br>
+      <button id="id_deactivate">D</button>&nbsp;
+      <input type="text" id="id_active" value="v_xei2is" disabled>
+      <br><br>
+
     </p>
 
     <table id="id_table1" class="display">
