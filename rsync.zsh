@@ -29,8 +29,8 @@ CMD=(
 
 )
 
-for i in ex*_* garbage*; do
-  CMD+=(--exclude=$i)
-done
+# for i in ex*_* garbage*; do
+#   CMD+=(--exclude=$i)
+# done
 
 exec $CMD[@] $@

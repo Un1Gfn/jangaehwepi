@@ -1,5 +1,7 @@
 #!/bin/env python3
 
+from datetime import datetime as dt
+
 from hashlib import sha1
 from http.server import HTTPServer, BaseHTTPRequestHandler, SimpleHTTPRequestHandler
 from io import BytesIO
@@ -10,6 +12,7 @@ from os.path import split
 from pathlib import Path
 from threading import Thread
 from urllib.parse import urlparse
+import benchmark
 import json
 import storage
 import trojan
@@ -117,6 +120,13 @@ class BackendHTTPRequestHandler(BaseHTTPRequestHandler):
                 self.end_headers()
                 self.wfile.write(json.dumps(storage.list()).encode())
 
+            case "/g_benchmark":
+                t0 = dt.now()
+                benchmark.benchmark()
+                print()
+                print(dt.now() - t0)
+                self.success()
+
             case _:
                 self.send_error(404, "E_INVALID", f'request "{urlparse(self.path)}" not implemented')
                 print(urlparse(self.path))
@@ -129,6 +139,7 @@ if __name__ == "__main__":
         raise RuntimeError
 
     storage.init()
+    benchmark.init()
     id = storage.storage['active']
     if id >= 0:
         trojan.activate(id)

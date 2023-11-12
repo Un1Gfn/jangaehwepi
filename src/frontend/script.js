@@ -31,6 +31,12 @@ $(document).ready(function(){
     location.reload(true);
   };
 
+  // benchmark button
+  id("id_benchmark").onclick = function(){
+    req(`${API}/g_benchmark/`);
+  };
+
+  // yaml download url
   id("id_yaml").href = SUBSCRIPTION;
 
   id("id_update").onclick = function(){

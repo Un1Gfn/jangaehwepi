@@ -4,11 +4,6 @@
 
 🕯️ R.I.P. Dreamacro/clash 🕯️
 
-```python
-def http_request_handler():
-    html += f"<x> {lat.value} </x>"
-```
-
 ```plain
 // <https://poe.com/s/Q81DPj93z7MDBYC54YNM>
 
@@ -49,7 +44,13 @@ void pub_stop(int *ctypesbuf){
 
 <https://man.archlinux.org/man/core/man-pages/pthreads.7.en>
 
-<https://www.randomlists.com/random-addresses>
-
 <https://trojan-gfw.github.io/trojan/config>
 
+parallelism = 1
+timeout_ms = 4000
+n_httping = 3
+total = 0:03:36.626869
+
+timeout_ms = 15000
+n_httping = 3
+total = ? min ? s

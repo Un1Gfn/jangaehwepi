@@ -75,3 +75,30 @@ parsed = parser.parse_args()
 class BackendHTTPRequestHandler(BaseHTTPRequestHandler):
     def log_message(self, format, *args):
         pass
+
+print(proc.poll())
+
+socket(AF_INET, SOCK_STREAM).bind(("127.0.0.1", port,))
+# print(detect(1080))
+
+def avail():
+    try:
+        s = create_server(("127.0.0.1", BENCHMARK_PORT,), family=AF_INET)
+        s.close()
+        print(f"[EE] trojan not running on port {port}")
+        r = True
+    except OSError as e:
+        assert e.errno == EADDRINUSE
+        print(f"[..] trojan detected on port {port}")
+        r = False
+    return r
+
+def avail0():
+    s = socket(AF_INET, SOCK_STREAM)
+    s.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
+    s.bind(("127.0.0.1", BENCHMARK_PORT,))
+    s.close()
+
+from inspect import currentframe
+def WAI(): # where am i
+    print(f"line {currentframe().f_back.f_lineno}")

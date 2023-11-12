@@ -1,16 +1,30 @@
 $(info please run this Makefile on Linux)
 
-MAKEFLAGS:=-j1
+MAKEFLAGS:=-B -j1
 
 default:
+	./mklnk.zsh
+	# $(MAKE) prep
+	$(MAKE) httping
+	$(MAKE) run
+
+# -dynamiclib
+# -shared
+httping:
+	[ x"$$(uname -s)" = xLinux ] || false
+	cd backend; gcc \
+	  -std=gnu17 -Wall -O3 -shared -fpic -o httping.so \
+	  $(shell curl-config --cflags) httping.c $(shell curl-config --libs)
+
+prep:
 	./mklnk.zsh
 	rm -fv backend/active.json
 	rm -fv backend/blacklist.json
 	rm -fv backend/clash.yaml
 	rm -fv backend/storage.json
-	$(MAKE) run
 
 run:
+	if pgrep trojan; then false; else true; fi
 	cd backend; ./main.py
 
 status:

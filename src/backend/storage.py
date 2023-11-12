@@ -56,6 +56,7 @@ def storage_from_clash():
     for p in from_yaml['proxies']:
         n = {
             'name': "",
+            'latency': -1,
             'conf': deepcopy(default_conf)
         }
         id += 1
@@ -81,7 +82,7 @@ def list():
     }
     for (i, n) in enumerate(storage['nodes']):
         if not any([ b.items() <= n['conf'].items() for b in blacklist ]):
-            d['list1'].append([ i, n['name'], -1 ])
+            d['list1'].append([ i, n['name'], n['latency'] ])
         else:
             d['list2'].append([ i, n['name'] ])
     return d

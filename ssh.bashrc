@@ -10,4 +10,5 @@ export HISTFILESIZE=-1
 
 # cd /tmp
 # cd /RSYNC
+# cd /RSYNC/jangaehwepi@820g3/ex6*
 cd /RSYNC/jangaehwepi@820g3/src
