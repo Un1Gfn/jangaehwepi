@@ -11,9 +11,10 @@
 
 from copy import deepcopy
 from lnk_conf import *
+from lnk_conf import *
 from os.path import isfile
 from ruamel.yaml import YAML
-from lnk_conf import *
+import benchmark
 import json
 
 blacklist = [
@@ -56,7 +57,7 @@ def storage_from_clash():
     for p in from_yaml['proxies']:
         n = {
             'name': "",
-            'latency': -1,
+            'latency': benchmark.PLACEHOLDER_NOT_TESTED_YET,
             'conf': deepcopy(default_conf)
         }
         id += 1
@@ -77,15 +78,20 @@ def storage_from_clash():
 def list():
     d = {
         'active': storage['active'],
+        'benchmarking': benchmark.benchmarking,
         'list1': [ ],
         'list2': [ ]
     }
-    for (i, n) in enumerate(storage['nodes']):
-        if not any([ b.items() <= n['conf'].items() for b in blacklist ]):
-            d['list1'].append([ i, n['name'], n['latency'] ])
+    for (id, n) in enumerate(storage['nodes']):
+        row = [ id, n['name'], n['latency'] ]
+        if not is_blacklisted(n['conf']):
+            d['list1'].append(row)
         else:
-            d['list2'].append([ i, n['name'] ])
+            d['list2'].append(row)
     return d
+
+def is_blacklisted(c):
+    return any([ c.items() >= b.items() for b in blacklist ])
 
 # g_ban
 def blacklist_append(id):

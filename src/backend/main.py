@@ -1,9 +1,9 @@
 #!/bin/env python3
 
-from datetime import datetime as dt
+# https://stackoverflow.com/questions/6063416/python-basehttpserver-how-do-i-catch-trap-broken-pipe-errors
 
 from hashlib import sha1
-from http.server import HTTPServer, BaseHTTPRequestHandler, SimpleHTTPRequestHandler
+from http.server import HTTPServer, BaseHTTPRequestHandler
 from io import BytesIO
 from lnk_conf import *
 from multipart import multipart, parse_form
@@ -16,15 +16,6 @@ import benchmark
 import json
 import storage
 import trojan
-
-class FrontendHTTPRequestHandler(SimpleHTTPRequestHandler):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, directory="../frontend", **kwargs)
-    def log_message(self, format, *args):
-        pass
-
-def frontend():
-    HTTPServer((FRONTEND_ADDR, FRONTEND_PORT,), FrontendHTTPRequestHandler).serve_forever()
 
 class BackendHTTPRequestHandler(BaseHTTPRequestHandler):
 
@@ -121,10 +112,9 @@ class BackendHTTPRequestHandler(BaseHTTPRequestHandler):
                 self.wfile.write(json.dumps(storage.list()).encode())
 
             case "/g_benchmark":
-                t0 = dt.now()
-                benchmark.benchmark()
+                if not benchmark.benchmarking:
+                    Thread(target=benchmark.benchmark).start()
                 print()
-                print(dt.now() - t0)
                 self.success()
 
             case _:
@@ -133,7 +123,7 @@ class BackendHTTPRequestHandler(BaseHTTPRequestHandler):
 
 if __name__ == "__main__":
 
-    ban_env = [ 'http_proxy', 'https_proxy', 'all_proxy', 'no_proxy', ]
+    ban_env = [ 'http_proxy', 'https_proxy', 'socks_proxy', 'socks5_proxy', 'socks5h_proxy', 'all_proxy', 'no_proxy', ]
     ban_env += [ e.upper() for e in ban_env ]
     if any([ e in environ for e in ban_env ]):
         raise RuntimeError
@@ -144,8 +134,4 @@ if __name__ == "__main__":
     if id >= 0:
         trojan.activate(id)
 
-    # frontend
-    Thread(target=frontend).start()
-
-    # backend
     HTTPServer((BACKEND_ADDR, BACKEND_PORT,), BackendHTTPRequestHandler).serve_forever()

@@ -1,12 +1,12 @@
 $(info please run this Makefile on Linux)
 
-MAKEFLAGS:=-B -j1
+MAKEFLAGS:=-B -j2
 
 default:
 	./mklnk.zsh
 	# $(MAKE) prep
 	$(MAKE) httping
-	$(MAKE) run
+	$(MAKE) run.frontend run.backend
 
 # -dynamiclib
 # -shared
@@ -23,7 +23,18 @@ prep:
 	rm -fv backend/clash.yaml
 	rm -fv backend/storage.json
 
-run:
+systemd:
+	[ x"$$(uname -s)" = xLinux ] || false
+	[ x"$$(whoami)" = xroot ] || false
+	cp -fv jangaehwepi-backend.service jangaehwepi-frontend.service /etc/systemd/system/
+	systemctl daemon-reload
+	systemctl enable jangaehwepi-backend.service jangaehwepi-frontend.service
+	systemctl status jangaehwepi-backend.service jangaehwepi-frontend.service
+
+run.frontend:
+	cd frontend; python -m http.server -b 0.0.0.0 6080 >/dev/null 2>&1
+
+run.backend:
 	if pgrep trojan; then false; else true; fi
 	cd backend; ./main.py
 

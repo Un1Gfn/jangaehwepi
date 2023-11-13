@@ -1,6 +1,6 @@
 * {
   font-family: sans-serif;
-  font-size: 16px;
+  font-size: 11px;
 }
 
 #id_headnote {
@@ -14,19 +14,15 @@
   padding: 0;
 }
 
-table {
-  width: 90%;
-}
-
 td {
   white-space: nowrap;
 }
 
-#table1 td:nth-child(2) {
+#id_table1 td:nth-child(2) {
   font-family: monospace, sans-serif;
   text-align: right;
 }
 
-#table1 td:nth-child(2):after {
+#id_table1 td:nth-child(2):after {
   content: " ms";
 }

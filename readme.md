@@ -51,6 +51,9 @@ timeout_ms = 4000
 n_httping = 3
 total = 0:03:36.626869
 
-timeout_ms = 15000
-n_httping = 3
-total = ? min ? s
+```zsh
+for id in ...; do
+  sleep 0.3
+  curl http://820g3:6081/g_ban/$id
+done
+```

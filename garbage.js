@@ -24,3 +24,8 @@ var table = new DataTable('#tb_nodes', {
 
 $.get(`${API}/g_activate/${data[0]}`, reload);
 
+// hang, choose file button unresponsive
+let now = new Date().getTime();
+while(new Date().getTime() < now + 3000){;}
+
+

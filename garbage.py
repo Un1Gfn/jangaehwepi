@@ -102,3 +102,27 @@ def avail0():
 from inspect import currentframe
 def WAI(): # where am i
     print(f"line {currentframe().f_back.f_lineno}")
+
+# timeout_ms: [4000]
+# https://github.com/iputils/iputils/blob/0cc6da796b9a64113152c071088701cb95a72ae8/ping/ping.h#L65
+# this value should be sent from frontend
+
+# Popen.kill()
+# Popen.terminate()
+
+class FrontendHTTPRequestHandler(SimpleHTTPRequestHandler):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, directory="../frontend", **kwargs)
+    def log_message(self, format, *args):
+        pass
+
+def pageserver():
+    while True:
+        try:
+            HTTPServer((FRONTEND_ADDR, FRONTEND_PORT,), FrontendHTTPRequestHandler).serve_forever()
+        except BrokenPipeError as e:
+            print(e)
+
+# GIL deadlock
+Process(target=pageserver).start()
+Thread(target=pageserver).start()

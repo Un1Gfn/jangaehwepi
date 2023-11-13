@@ -12,7 +12,7 @@ default:
 
 rsync:
 	ssh root@820g3 systemctl start rsyncd.service
-	find . -type f | entr ./rsync.zsh . rsync://820g3/hudrpl/jangaehwepi@820g3
+	while true; do sleep 1; find . -type f | entr ./rsync.zsh . rsync://820g3/hudrpl/jangaehwepi@820g3; done
 
 ssh:
 	ssh root@820g3 -t sudo -u rsync /bin/bash --rcfile /RSYNC/jangaehwepi@820g3/ssh.bashrc || true

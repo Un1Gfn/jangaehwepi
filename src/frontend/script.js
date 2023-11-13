@@ -21,9 +21,14 @@ $(document).ready(function(){
     return document.getElementById(i);
   }
 
-  // active node
+  // pull data
   j = JSON.parse(req(`${API}/g_pull/`));
+
+  // active node
   id("id_active").value = `active = ${j.active}`;
+
+  // if benchmark is running
+  id("id_benchmarking").value = j.benchmarking ? "running ..." : "ready"
 
   // deactivate button
   id("id_deactivate").onclick = function(){
@@ -34,6 +39,7 @@ $(document).ready(function(){
   // benchmark button
   id("id_benchmark").onclick = function(){
     req(`${API}/g_benchmark/`);
+    location.reload(true);
   };
 
   // yaml download url
@@ -54,17 +60,20 @@ $(document).ready(function(){
   let table1 = new DataTable('#id_table1', {
     info: true,
     ordering: true,
+    order: [ [ 1, 'asc' ], [ 0, 'asc' ] ],
     paging: false,
     dom: 'Bf',
     data: j.list1,
     columns: [
-      { data: 0,    width: "1em",  type: "num", },
-      { data: 2,    width: "5em",  type: "num", },
+      { data: 0,    width: "0",  type: "num", },
+      { data: 2,    width: "0",  type: "num", },
       { data: 1,    width: "auto" },
-      { data: null, width: "2em",  defaultContent: "<button class='c_activate'>&nbsp;</button>", orderable: false },
-      { data: null, width: "2em",  defaultContent: "<button class='c_blacklist'>&nbsp;</button>", orderable: false }
+      { data: null, width: "3em",  defaultContent: "<button class='c_activate'>&nbsp;</button>", orderable: false },
+      { data: null, width: "3em",  defaultContent: "<button class='c_blacklist'>&nbsp;</button>", orderable: false }
     ]
   });
+
+  table1.columns.adjust().draw();
 
   // activate button
   table1.on('click', 'button', function(e){
@@ -96,6 +105,8 @@ $(document).ready(function(){
       { data: 1,    width: "auto" },
     ]
   });
+
+  table2.columns.adjust().draw();
 
   table2.on('click', 'button', function(e){
     let data = table2.row(e.target.closest('tr')).data();

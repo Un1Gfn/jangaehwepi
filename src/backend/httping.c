@@ -18,6 +18,7 @@
 #include <curl/curl.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <time.h>
 #include <time.h>
 
@@ -56,16 +57,29 @@ int64_t ff(const char *const url, const char *const proxy, const long timeout_ms
   const CURLcode n=curl_easy_perform(c);
   clock_gettime(CLOCK_REALTIME, &t2);
 
-  if(CURLE_OPERATION_TIMEDOUT==n)
-    return -1;
+  switch(n){
 
-  if(CURLE_OK==n)
-    return (
-      (int64_t)(t2.tv_sec  - t1.tv_sec) * 1000LL * 1000LL * 1000LL +
-      (int64_t)(t2.tv_nsec - t1.tv_nsec)
-    );
+    case CURLE_OPERATION_TIMEDOUT:
+      return -1;
+      break;
 
-  fprintf(stderr, "request failed with error [%u] %s\n", n, curl_easy_strerror(n));
-  assert(0);
+    case CURLE_GOT_NOTHING:
+      fprintf(stderr, "CURLE_GOT_NOTHING\n");
+      return (-1LL * CURLE_GOT_NOTHING);
+      break;
+
+    case CURLE_OK:
+      return (
+        (int64_t)(t2.tv_sec  - t1.tv_sec) * 1000LL * 1000LL * 1000LL +
+        (int64_t)(t2.tv_nsec - t1.tv_nsec)
+      );
+      break;
+
+    default:
+      fprintf(stderr, "request failed with error [%u] %s\n", n, curl_easy_strerror(n));
+      assert(0);
+      break;
+
+  }
 
 }

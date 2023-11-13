@@ -5,7 +5,9 @@
 # https://stackoverflow.com/questions/18679264/how-to-use-malloc-and-free-with-python-ctypes
 
 from copy import deepcopy
+from time import sleep
 from ctypes import c_char_p, c_int64, c_long, CDLL
+from datetime import datetime
 from errno import EADDRINUSE
 from lnk_conf import *
 from pathlib import Path
@@ -16,7 +18,12 @@ from subprocess import Popen, DEVNULL
 import json
 import storage
 
+PLACEHOLDER_NOT_TESTED_YET =  77777 # 78s
+PLACEHOLDER_TIMEOUT        =  88888 # 89s
+
 ff = None
+
+benchmarking = False
 
 def avail():
     s = socket(AF_INET, SOCK_STREAM)
@@ -31,13 +38,13 @@ def avail():
 
 def wait_until_open():
     if avail():
-        print("wait until port is open ...")
+        # print("wait until port is open ...")
         while avail():
             pass
 
 def wait_until_avail():
     if not avail():
-        print("wait until port is available ...")
+        # print("wait until port is available ...")
         while not avail():
             pass
 
@@ -49,56 +56,68 @@ def init():
     ff.argtypes = [ c_char_p, c_char_p, c_long ]
     ff.restype = c_int64
 
-def httping(n):
-    if n <= 0: return
+def httping():
+    minimum = PLACEHOLDER_TIMEOUT
+    global ff
     url = BENCHMARK_URL.encode()
     proxy = f"socks5h://127.0.0.1:{BENCHMARK_PORT}".encode()
-    # https://github.com/iputils/iputils/blob/0cc6da796b9a64113152c071088701cb95a72ae8/ping/ping.h#L65
-    # 4000
-    # this value should be sent from frontend
-    timeout_ms = 4000
-    latency = ff(url, proxy, timeout_ms)
-    match latency:
-        case -1:
+    for _ in range(3):
+        lns = ff(url, proxy, BENCHMARK_TIMEOUT_MS)
+        lms = int(lns/(1000*1000))
+        if lns == -1:
             print("CURLE_OPERATION_TIMEDOUT")
-            return False
-        case _:
-            print(f"{latency/(1000*1000)} ms ... {latency} ns")
-            httping(n-1)
-            return True
+            return minimum
+        print(f"{lms} ms ... {lns} ns")
+        if lms < minimum: minimum = lms
+    return minimum
 
 def benchmark():
 
+    global benchmarking
+    benchmarking = True
+    sleep(1)
+    for n in storage.storage['nodes']:
+        n['latency'] = PLACEHOLDER_NOT_TESTED_YET
     print()
 
-    assert len(storage.storage['nodes']) == 118
     l = list(range(len(storage.storage['nodes'])))
     shuffle(l)
-
     wait_until_avail()
+
+    t0 = datetime.now()
+
     for (index, id,) in enumerate(l):
 
-        print(f"[{index + 1}/{len(l) - 1}]")
+        n = storage.storage['nodes'][id]
+        c = n['conf']
+
+        if storage.is_blacklisted(c):
+            print(f"[{index + 1}/{len(l)}] #{index} {n['name']} ... banned\n")
+            continue
+        else:
+            print(f"[{index + 1}/{len(l)}] #{index} {n['name']} ... 127.0.0.1:{BENCHMARK_PORT} => {c['remote_addr']}:{c['remote_port']}")
+
         with open("benchmark.json", 'w') as f:
-            c = deepcopy(storage.storage['nodes'][id]['conf'])
-            c['local_addr'] = "127.0.0.1"
-            c['local_port'] = BENCHMARK_PORT
-            print(f"{c['local_addr']}:{c['local_port']} => {c['remote_addr']}:{c['remote_port']}")
-            json.dump(c, f, ensure_ascii=True, indent="  ", )
-        # p = Popen([CPPTROJAN_PATH, "-c", "benchmark.json"])
+            c2 = deepcopy(c)
+            c2['local_addr'] = "127.0.0.1"
+            c2['local_port'] = BENCHMARK_PORT
+            json.dump(c2, f, ensure_ascii=True, indent="  ", )
+
         p = Popen([CPPTROJAN_PATH, "-c", "benchmark.json"], stdout=DEVNULL, stderr=DEVNULL)
         wait_until_open()
 
-        global ff
-        print("httping ...")
-        httping(3)
+        # print("httping ...")
+        n['latency'] = httping()
 
-        # p.kill()
-        # p.terminate()
         p.send_signal(SIGINT)
-        print("wait until trojan exits ...")
+        # print("wait until trojan exits ...")
         p.wait()
         wait_until_avail()
         print()
 
         Path("benchmark.json").unlink(missing_ok=False)
+
+    benchmarking = False
+    print(f"total: {datetime.now() - t0}")
+    print()
+    storage.storage_save()

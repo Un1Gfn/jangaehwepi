@@ -3,7 +3,7 @@
 # https://man.archlinux.org/man/core/systemd/systemd.unit.5.en
 
 [Unit]
-Description=WSGI Clash Monitor
+Description=Jangaehwepi frontend
 After=network.target
 After=sys-subsystem-net-devices-enp0s31f6.device
 BindsTo=sys-subsystem-net-devices-enp0s31f6.device
@@ -16,8 +16,8 @@ Group=rsync
 Type=exec
 Restart=on-failure
 RestartSec=3s
-WorkingDirectory=/RSYNC/jangaehwepi@820g3/src/backend
-ExecStart=/usr/bin/python3 main.py
+WorkingDirectory=/RSYNC/jangaehwepi@820g3/src/frontend
+ExecStart=/usr/bin/python3 -m http.server -b 0.0.0.0 6080
 
 [Install]
 WantedBy=default.target

@@ -1,0 +1,23 @@
+# https://man.archlinux.org/man/core/systemd/systemd.exec.5.en
+# https://man.archlinux.org/man/core/systemd/systemd.service.5.en
+# https://man.archlinux.org/man/core/systemd/systemd.unit.5.en
+
+[Unit]
+Description=Jangaehwepi backend
+After=network.target
+After=sys-subsystem-net-devices-enp0s31f6.device
+BindsTo=sys-subsystem-net-devices-enp0s31f6.device
+
+[Service]
+StandardError=journal
+StandardOutput=journal
+User=rsync
+Group=rsync
+Type=exec
+Restart=on-failure
+RestartSec=3s
+WorkingDirectory=/RSYNC/jangaehwepi@820g3/src/backend
+ExecStart=/usr/bin/python3 main.py
+
+[Install]
+WantedBy=default.target
