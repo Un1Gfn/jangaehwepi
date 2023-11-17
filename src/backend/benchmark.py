@@ -5,16 +5,17 @@
 # https://stackoverflow.com/questions/18679264/how-to-use-malloc-and-free-with-python-ctypes
 
 from copy import deepcopy
-from time import sleep
 from ctypes import c_char_p, c_int64, c_long, CDLL
 from datetime import datetime
 from errno import EADDRINUSE
 from lnk_conf import *
+from os import uname
 from pathlib import Path
 from random import shuffle
 from signal import SIGINT
 from socket import socket, AF_INET, SOCK_STREAM, SOL_SOCKET, SO_REUSEADDR
 from subprocess import Popen, DEVNULL
+from time import sleep
 import json
 import storage
 
@@ -50,7 +51,10 @@ def wait_until_avail():
 
 def init():
     global ff
-    dll = CDLL("./httping.so")
+    match uname().sysname:
+        case 'Darwin': dll = CDLL("./httping.dylib")
+        case 'Linux':  dll = CDLL("./httping.so")
+        case _: raise RuntimeError
     dll.init()
     ff = dll.ff
     ff.argtypes = [ c_char_p, c_char_p, c_long ]

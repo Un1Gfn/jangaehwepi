@@ -1,4 +1,4 @@
-#!/bin/env python3
+#!/usr/bin/env python3
 
 from ctypes import c_int, pointer, byref
 from ctypes import CDLL, POINTER

@@ -1,19 +1,24 @@
-$(info please run this Makefile on Linux)
+#!/usr/bin/env gmake -f
 
 MAKEFLAGS:=-B -j2
 
 default:
+	$(MAKE) -B -C "$$(dirname "$$_")" run
+
+run:
 	./mklnk.zsh
 	# $(MAKE) prep
-	$(MAKE) httping
+	$(MAKE) "httping.$$(uname -s)"
 	$(MAKE) run.frontend run.backend
 
-# -dynamiclib
-# -shared
-httping:
-	[ x"$$(uname -s)" = xLinux ] || false
+httping.Darwin:
 	cd backend; gcc \
-	  -std=gnu17 -Wall -O3 -shared -fpic -o httping.so \
+	  -std=gnu2x -Wall -O3 -dynamiclib -fpic -o httping.dylib \
+	  $(shell curl-config --cflags) httping.c $(shell curl-config --libs)
+
+httping.Linux:
+	cd backend; gcc \
+	  -std=gnu2x -Wall -O3 -shared -fpic -o httping.so \
 	  $(shell curl-config --cflags) httping.c $(shell curl-config --libs)
 
 prep:
@@ -32,7 +37,7 @@ systemd:
 	systemctl status jangaehwepi-backend.service jangaehwepi-frontend.service
 
 run.frontend:
-	cd frontend; python -m http.server -b 0.0.0.0 6080 >/dev/null 2>&1
+	cd frontend; python -m http.server -b 127.0.0.1 6080 >/dev/null 2>&1
 
 run.backend:
 	if pgrep trojan; then false; else true; fi

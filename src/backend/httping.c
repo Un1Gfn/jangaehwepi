@@ -17,8 +17,10 @@
 #include <assert.h>
 #include <curl/curl.h>
 #include <stdint.h>
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/utsname.h>
 #include <time.h>
 #include <time.h>
 
@@ -33,7 +35,14 @@ void init(){
   struct timespec r={};
   assert(0==clock_getres(CLOCK_REALTIME, &r));
   assert(0==r.tv_sec);
-  assert(1==r.tv_nsec);
+
+  struct utsname u={};
+  assert(0==uname(&u));
+
+  if(0) {;}
+  else if(0==strcmp("Darwin", u.sysname)) { assert(1000==r.tv_nsec); }
+  else if(0==strcmp("Linux", u.sysname)) { assert(1==r.tv_nsec); }
+  else { assert(0); }
 
   curl_global_init(CURL_GLOBAL_DEFAULT);
   c=curl_easy_init();

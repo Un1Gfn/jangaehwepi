@@ -10,3 +10,10 @@ lnk*js
 
 *.png
 *.ico
+
+active.json
+blacklist.json
+storage.json
+*.so
+*.dylib
+*.pyc
