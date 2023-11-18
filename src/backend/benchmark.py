@@ -15,6 +15,7 @@ from random import shuffle
 from signal import SIGINT
 from socket import socket, AF_INET, SOCK_STREAM, SOL_SOCKET, SO_REUSEADDR
 from subprocess import Popen, DEVNULL
+from threading import Thread
 from time import sleep
 import json
 import storage
@@ -24,7 +25,11 @@ PLACEHOLDER_TIMEOUT        =  88888 # 89s
 
 ff = None
 
-benchmarking = False
+benchmarking = 0
+
+# from inspect import currentframe
+# def WAI(): # where am i
+#     print(f"line {currentframe().f_back.f_lineno}")
 
 def avail():
     s = socket(AF_INET, SOCK_STREAM)
@@ -37,16 +42,22 @@ def avail():
         assert e.errno == EADDRINUSE
     return False
 
+exit_request = False
+
 def wait_until_open():
+    global exit_request
+    exit_request = False
     if avail():
         # print("wait until port is open ...")
-        while avail():
+        while ( not exit_request ) and avail():
             pass
 
 def wait_until_avail():
+    global exit_request
+    exit_request = False
     if not avail():
         # print("wait until port is available ...")
-        while not avail():
+        while ( not exit_request ) and ( not avail() ):
             pass
 
 def init():
@@ -78,7 +89,8 @@ def httping():
 def benchmark():
 
     global benchmarking
-    benchmarking = True
+    global exit_request
+    benchmarking = 1
     sleep(1)
     for n in storage.storage['nodes']:
         n['latency'] = PLACEHOLDER_NOT_TESTED_YET
@@ -108,20 +120,37 @@ def benchmark():
             json.dump(c2, f, ensure_ascii=True, indent="  ", )
 
         p = Popen([CPPTROJAN_PATH, "-c", "benchmark.json"], stdout=DEVNULL, stderr=DEVNULL)
-        wait_until_open()
-
-        # print("httping ...")
-        n['latency'] = httping()
-
+        t = Thread(target=wait_until_open)
+        t.start()
+        t.join(timeout=int(BENCHMARK_TIMEOUT_MS/1000))
+        timeout = True if t.is_alive() else False
+        exit_request = True
+        # WAI()
+        if not timeout:
+            # WAI()
+            # print("httping ...")
+            n['latency'] = httping()
         p.send_signal(SIGINT)
         # print("wait until trojan exits ...")
         p.wait()
         wait_until_avail()
         print()
-
         Path("benchmark.json").unlink(missing_ok=False)
+        # WAI()
+        if timeout:
+            # WAI()
+            benchmarking = 2
+            break
+        # WAI()
 
-    benchmarking = False
-    print(f"total: {datetime.now() - t0}")
+    match benchmarking:
+        case 2:
+            print("error a9gh4z - benchmark stopped")
+        case 1:
+            benchmarking = 0
+            print(f"total: {datetime.now() - t0}")
+            storage.storage_save()
+        case _:
+            raise RuntimeError()
+
     print()
-    storage.storage_save()

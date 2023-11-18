@@ -112,7 +112,7 @@ class BackendHTTPRequestHandler(BaseHTTPRequestHandler):
                 self.wfile.write(json.dumps(storage.list()).encode())
 
             case "/g_benchmark":
-                if not benchmark.benchmarking:
+                if 1 != benchmark.benchmarking:
                     Thread(target=benchmark.benchmark).start()
                 print()
                 self.success()

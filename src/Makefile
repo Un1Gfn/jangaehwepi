@@ -8,7 +8,6 @@ default:
 run:
 	./mklnk.zsh
 	# $(MAKE) prep
-	$(MAKE) "httping.$$(uname -s)"
 	$(MAKE) run.frontend run.backend
 
 httping.Darwin:
@@ -40,6 +39,7 @@ run.frontend:
 	cd frontend; python -m http.server -b 127.0.0.1 6080 >/dev/null 2>&1
 
 run.backend:
+	$(MAKE) "httping.$$(uname -s)"
 	if pgrep trojan; then false; else true; fi
 	cd backend; ./main.py
 

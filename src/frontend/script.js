@@ -28,7 +28,7 @@ $(document).ready(function(){
   id("id_active").value = `active = ${j.active}`;
 
   // if benchmark is running
-  id("id_benchmarking").value = j.benchmarking ? "running ..." : "ready"
+  id("id_benchmarking").value =  [ "ready", "running ...", "failed" ][j.benchmarking]
 
   // deactivate button
   id("id_deactivate").onclick = function(){
