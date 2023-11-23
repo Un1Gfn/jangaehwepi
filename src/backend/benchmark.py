@@ -20,10 +20,9 @@ from time import sleep
 import json
 import storage
 
-PLACEHOLDER_NOT_TESTED_YET =  77777 # 78s
-PLACEHOLDER_TIMEOUT        =  88888 # 89s
-
 ff = None
+
+PLACEHOLDER_NOT_TESTED_YET = -128
 
 benchmarking = 0
 
@@ -36,11 +35,12 @@ def avail():
     s.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
     try:
         s.bind(("127.0.0.1", BENCHMARK_PORT,))
-        s.close()
-        return True
+        r = True
     except OSError as e:
         assert e.errno == EADDRINUSE
-    return False
+        r = False
+    s.close()
+    return r
 
 exit_request = False
 
@@ -50,7 +50,8 @@ def wait_until_open():
     if avail():
         # print("wait until port is open ...")
         while ( not exit_request ) and avail():
-            pass
+            # pass
+            sleep(0.1)
 
 def wait_until_avail():
     global exit_request
@@ -58,7 +59,8 @@ def wait_until_avail():
     if not avail():
         # print("wait until port is available ...")
         while ( not exit_request ) and ( not avail() ):
-            pass
+            # pass
+            sleep(0.1)
 
 def init():
     global ff
@@ -72,18 +74,18 @@ def init():
     ff.restype = c_int64
 
 def httping():
-    minimum = PLACEHOLDER_TIMEOUT
+    minimum = BENCHMARK_TIMEOUT_MS
     global ff
     url = BENCHMARK_URL.encode()
     proxy = f"socks5h://127.0.0.1:{BENCHMARK_PORT}".encode()
     for _ in range(3):
         lns = ff(url, proxy, BENCHMARK_TIMEOUT_MS)
         lms = int(lns/(1000*1000))
-        if lns == -1:
-            print("CURLE_OPERATION_TIMEDOUT")
-            return minimum
+        if lns < 0 :
+            return lns
         print(f"{lms} ms ... {lns} ns")
-        if lms < minimum: minimum = lms
+        if lms < minimum:
+            minimum = lms
     return minimum
 
 def benchmark():
@@ -123,29 +125,15 @@ def benchmark():
         t = Thread(target=wait_until_open)
         t.start()
         t.join(timeout=int(BENCHMARK_TIMEOUT_MS/1000))
-        timeout = True if t.is_alive() else False
         exit_request = True
-        # WAI()
-        if not timeout:
-            # WAI()
-            # print("httping ...")
-            n['latency'] = httping()
+        n['latency'] = httping()
         p.send_signal(SIGINT)
-        # print("wait until trojan exits ...")
         p.wait()
         wait_until_avail()
         print()
         Path("benchmark.json").unlink(missing_ok=False)
-        # WAI()
-        if timeout:
-            # WAI()
-            benchmarking = 2
-            break
-        # WAI()
 
     match benchmarking:
-        case 2:
-            print("error a9gh4z - benchmark stopped")
         case 1:
             benchmarking = 0
             print(f"total: {datetime.now() - t0}")

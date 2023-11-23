@@ -68,13 +68,10 @@ int64_t ff(const char *const url, const char *const proxy, const long timeout_ms
 
   switch(n){
 
-    case CURLE_OPERATION_TIMEDOUT:
-      return -1;
-      break;
-
-    case CURLE_GOT_NOTHING:
-      fprintf(stderr, "CURLE_GOT_NOTHING\n");
-      return (-1LL * CURLE_GOT_NOTHING);
+    case CURLE_COULDNT_CONNECT:    fprintf(stderr, "CURLE_COULDNT_CONNECT\n");
+    case CURLE_GOT_NOTHING:        fprintf(stderr, "CURLE_GOT_NOTHING\n");
+    case CURLE_OPERATION_TIMEDOUT: fprintf(stderr, "CURLE_OPERATION_TIMEDOUT\n");
+      return -1LL*n;
       break;
 
     case CURLE_OK:

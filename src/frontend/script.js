@@ -60,7 +60,7 @@ $(document).ready(function(){
   let table1 = new DataTable('#id_table1', {
     info: true,
     ordering: true,
-    order: [ [ 1, 'asc' ], [ 0, 'asc' ] ],
+    order: [ [ 1, 'desc' ], [ 0, 'asc' ] ],
     paging: false,
     dom: 'Bf',
     data: j.list1,
