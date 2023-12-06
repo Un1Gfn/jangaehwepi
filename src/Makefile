@@ -10,6 +10,21 @@ run:
 	# $(MAKE) prep
 	$(MAKE) run.frontend run.backend
 
+prep:
+	./mklnk.zsh
+	rm -fv backend/active.json
+	rm -fv backend/blacklist.json
+	rm -fv backend/clash.yaml
+	rm -fv backend/storage.json
+	$(MAKE) "httping.$$(uname -s)"
+
+run.frontend:
+	cd frontend; python -m http.server -b 127.0.0.1 6080 >/dev/null 2>&1
+
+run.backend:
+	if pgrep trojan; then false; else true; fi
+	cd backend; ./main.py
+
 httping.Darwin:
 	cd backend; gcc \
 	  -std=gnu2x -Wall -O3 -dynamiclib -fpic -o httping.dylib \
@@ -20,13 +35,6 @@ httping.Linux:
 	  -std=gnu2x -Wall -O3 -shared -fpic -o httping.so \
 	  $(shell curl-config --cflags) httping.c $(shell curl-config --libs)
 
-prep:
-	./mklnk.zsh
-	rm -fv backend/active.json
-	rm -fv backend/blacklist.json
-	rm -fv backend/clash.yaml
-	rm -fv backend/storage.json
-
 systemd:
 	[ x"$$(uname -s)" = xLinux ] || false
 	[ x"$$(whoami)" = xroot ] || false
@@ -34,14 +42,6 @@ systemd:
 	systemctl daemon-reload
 	systemctl enable jangaehwepi-backend.service jangaehwepi-frontend.service
 	systemctl status jangaehwepi-backend.service jangaehwepi-frontend.service
-
-run.frontend:
-	cd frontend; python -m http.server -b 127.0.0.1 6080 >/dev/null 2>&1
-
-run.backend:
-	$(MAKE) "httping.$$(uname -s)"
-	if pgrep trojan; then false; else true; fi
-	cd backend; ./main.py
 
 status:
 	{ \

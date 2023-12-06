@@ -15,7 +15,7 @@ from urllib.parse import urlparse
 import benchmark
 import json
 import storage
-import trojan
+import proxy
 
 class BackendHTTPRequestHandler(BaseHTTPRequestHandler):
 
@@ -66,7 +66,7 @@ class BackendHTTPRequestHandler(BaseHTTPRequestHandler):
         assert self.path == "/g_upload/"
         self.mfd()
         if storage.storage['active'] >= 0:
-            trojan.deactivate()
+            proxy.deactivate()
         storage.storage_from_clash()
         storage.storage_save()
         self.success()
@@ -81,18 +81,18 @@ class BackendHTTPRequestHandler(BaseHTTPRequestHandler):
 
             case "/g_deactivate":
                 if storage.storage['active'] >= 0:
-                    trojan.deactivate()
+                    proxy.deactivate()
                     storage.storage['active'] = -1
                     self.send_response(200, "deactivated"); self.end_headers()
                 self.success()
 
             case "/g_activate":
                 if storage.storage['active'] >= 0:
-                    trojan.deactivate()
+                    proxy.deactivate()
                     storage.storage['active'] = -1
                 id = int(p[1])
                 assert id >= 0
-                trojan.activate(id)
+                proxy.activate(id)
                 storage.storage['active'] = id
                 storage.storage_save()
                 self.success()
@@ -132,6 +132,6 @@ if __name__ == "__main__":
     benchmark.init()
     id = storage.storage['active']
     if id >= 0:
-        trojan.activate(id)
+        proxy.activate(id)
 
     HTTPServer((BACKEND_ADDR, BACKEND_PORT,), BackendHTTPRequestHandler).serve_forever()

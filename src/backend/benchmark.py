@@ -11,6 +11,7 @@ from errno import EADDRINUSE
 from lnk_conf import *
 from os import uname
 from pathlib import Path
+from proxy import ss_args
 from random import shuffle
 from signal import SIGINT
 from socket import socket, AF_INET, SOCK_STREAM, SOL_SOCKET, SO_REUSEADDR
@@ -50,7 +51,6 @@ def wait_until_open():
     if avail():
         # print("wait until port is open ...")
         while ( not exit_request ) and avail():
-            # pass
             sleep(0.1)
 
 def wait_until_avail():
@@ -59,7 +59,6 @@ def wait_until_avail():
     if not avail():
         # print("wait until port is available ...")
         while ( not exit_request ) and ( not avail() ):
-            # pass
             sleep(0.1)
 
 def init():
@@ -110,18 +109,28 @@ def benchmark():
         c = n['conf']
 
         if storage.is_blacklisted(c):
-            print(f"[{index + 1}/{len(l)}] #{index} {n['name']} ... banned\n")
+            print(f"[{index + 1}/{len(l)}] #{index} {n['name']}\nbanned\n")
             continue
         else:
-            print(f"[{index + 1}/{len(l)}] #{index} {n['name']} ... 127.0.0.1:{BENCHMARK_PORT} => {c['remote_addr']}:{c['remote_port']}")
+            print(f"[{index + 1}/{len(l)}] #{index} {n['name']}\n127.0.0.1:{BENCHMARK_PORT} => {c['mjm3lo_ip']}:{c['mjm3lo_port']}")
 
-        with open("benchmark.json", 'w') as f:
-            c2 = deepcopy(c)
-            c2['local_addr'] = "127.0.0.1"
-            c2['local_port'] = BENCHMARK_PORT
-            json.dump(c2, f, ensure_ascii=True, indent="  ", )
+        match n['type']:
 
-        p = Popen([CPPTROJAN_PATH, "-c", "benchmark.json"], stdout=DEVNULL, stderr=DEVNULL)
+            case 'trojan':
+                with open("benchmark.json", 'w') as f:
+                    c2 = deepcopy(c)
+                    c2['local_addr'] = "127.0.0.1"
+                    c2['local_port'] = BENCHMARK_PORT
+                    json.dump(c2, f, ensure_ascii=True, indent="  ", )
+                p = Popen([PATH_CPPTROJAN, "-c", "benchmark.json"], stdout=DEVNULL, stderr=DEVNULL)
+
+            case 'ss':
+                l = ss_args(c, BENCHMARK_PORT)
+                p = Popen(l, stdout=DEVNULL, stderr=DEVNULL)
+
+            case _:
+                raise RuntimeError
+
         t = Thread(target=wait_until_open)
         t.start()
         t.join(timeout=int(BENCHMARK_TIMEOUT_MS/1000))
@@ -131,7 +140,8 @@ def benchmark():
         p.wait()
         wait_until_avail()
         print()
-        Path("benchmark.json").unlink(missing_ok=False)
+        try: Path("benchmark.json").unlink(missing_ok=False)
+        except FileNotFoundError: pass
 
     match benchmarking:
         case 1:

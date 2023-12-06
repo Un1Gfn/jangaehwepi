@@ -58,20 +58,42 @@ def storage_from_clash():
         n = {
             'name': "",
             'latency': benchmark.PLACEHOLDER_NOT_TESTED_YET,
+            'type': "",
             'conf': deepcopy(default_conf)
         }
         id += 1
-        for k, v in p.items():
-            match k:
-                case 'skip-cert-verify': assert True == v
-                case 'udp':              assert True == v
-                case 'type':             assert "trojan" == v
-                case 'alpn':             assert "['h2', 'http/1.1']" == str(v)
-                case 'name':             n['name'] = v
-                case 'server':           n['conf']['remote_addr'] = v
-                case 'port':             n['conf']['remote_port'] = v
-                case 'password':         n['conf']['password'] = [ v ]
-                case _:                  print(f"unknown field ['{k}']: \"{v}\""); raise RuntimeError
+
+        assert 'type' in p
+
+        match p['type']:
+
+            case "trojan":
+                n['type'] = "trojan"
+                for k, v in p.items():
+                    match k:
+                        case 'type':             assert v == "trojan"
+                        case 'skip-cert-verify': assert v == True
+                        case 'udp':              assert v == True
+                        case 'alpn':             assert str(v) == "['h2', 'http/1.1']"
+                        case 'name':             n['name'] = v
+                        case 'server':           n['conf']['mjm3lo_ip'] = v
+                        case 'port':             n['conf']['mjm3lo_port'] = v
+                        case 'password':         n['conf']['mjm3lo_secret'] = [ v ]
+                        case _:                  print(f"unknown field ['{k}']: \"{v}\""); raise RuntimeError
+
+            case "ss":
+                n['type'] = "ss"
+                for k, v in p.items():
+                    match k:
+                        case 'cipher':   assert v == "aes-256-cfb"
+                        case 'type':     assert "ss" == v
+                        case 'udp':      assert v == True
+                        case 'name':     n['name'] = v
+                        case 'server':   n['conf']['mjm3lo_ip'] = v
+                        case 'port':     n['conf']['mjm3lo_port'] = v
+                        case 'password': n['conf']['mjm3lo_secret'] = v
+                        case _:          print(f"unknown field ['{k}']: \"{v}\""); raise RuntimeError
+
         storage['nodes'].append(n)
 
 # g_pull
@@ -97,8 +119,8 @@ def is_blacklisted(c):
 def blacklist_append(id):
     c = storage['nodes'][id]['conf']
     blacklist.append({
-        'remote_addr': c['remote_addr'],
-        'remote_port': c['remote_port']
+        'mjm3lo_ip': c['mjm3lo_ip'],
+        'mjm3lo_port': c['mjm3lo_port']
     })
     blacklist_save()
 
