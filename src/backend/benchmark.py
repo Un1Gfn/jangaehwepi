@@ -27,9 +27,13 @@ PLACEHOLDER_NOT_TESTED_YET = -128
 
 benchmarking = 0
 
-# from inspect import currentframe
-# def WAI(): # where am i
-#     print(f"line {currentframe().f_back.f_lineno}")
+exit_request_checkport = False
+
+exit_request_benchmark = False
+
+from inspect import currentframe
+def WAI(): # where am i
+    print(f"line {currentframe().f_back.f_lineno}")
 
 def avail():
     s = socket(AF_INET, SOCK_STREAM)
@@ -43,22 +47,20 @@ def avail():
     s.close()
     return r
 
-exit_request = False
-
 def wait_until_open():
-    global exit_request
-    exit_request = False
+    global exit_request_checkport
+    exit_request_checkport = False
     if avail():
         # print("wait until port is open ...")
-        while ( not exit_request ) and avail():
+        while ( not exit_request_checkport ) and avail():
             sleep(0.1)
 
 def wait_until_avail():
-    global exit_request
-    exit_request = False
+    global exit_request_checkport
+    exit_request_checkport = False
     if not avail():
         # print("wait until port is available ...")
-        while ( not exit_request ) and ( not avail() ):
+        while ( not exit_request_checkport ) and ( not avail() ):
             sleep(0.1)
 
 def init():
@@ -90,7 +92,9 @@ def httping():
 def benchmark():
 
     global benchmarking
-    global exit_request
+    global exit_request_checkport
+    global exit_request_benchmark
+
     benchmarking = 1
     sleep(1)
     for n in storage.storage['nodes']:
@@ -101,21 +105,27 @@ def benchmark():
     shuffle(l)
     wait_until_avail()
 
+    exit_request_benchmark = False
     t0 = datetime.now()
 
     for (index, id,) in enumerate(l):
 
+        if exit_request_benchmark:
+            break
+
         n = storage.storage['nodes'][id]
         c = n['conf']
-
-        if storage.is_blacklisted(c):
+        if storage.is_blacklisted(n):
             print(f"[{index + 1}/{len(l)}] #{index} {n['name']}\nbanned\n")
             continue
         else:
-            print(f"[{index + 1}/{len(l)}] #{index} {n['name']}\n127.0.0.1:{BENCHMARK_PORT} => {c['mjm3lo_ip']}:{c['mjm3lo_port']}")
+            match n['type']:
+                case 'trojan':
+                    print(f"[{index + 1}/{len(l)}] #{index} {n['name']}\n127.0.0.1:{BENCHMARK_PORT} => {c['remote_addr']}:{c['remote_port']}")
+                case 'ss':
+                    print(f"[{index + 1}/{len(l)}] #{index} {n['name']}\n127.0.0.1:{BENCHMARK_PORT} => {c['server']}:{c['server_port']}")
 
         match n['type']:
-
             case 'trojan':
                 with open("benchmark.json", 'w') as f:
                     c2 = deepcopy(c)
@@ -123,18 +133,16 @@ def benchmark():
                     c2['local_port'] = BENCHMARK_PORT
                     json.dump(c2, f, ensure_ascii=True, indent="  ", )
                 p = Popen([PATH_CPPTROJAN, "-c", "benchmark.json"], stdout=DEVNULL, stderr=DEVNULL)
-
             case 'ss':
                 l = ss_args(c, BENCHMARK_PORT)
                 p = Popen(l, stdout=DEVNULL, stderr=DEVNULL)
-
             case _:
                 raise RuntimeError
 
         t = Thread(target=wait_until_open)
         t.start()
         t.join(timeout=int(BENCHMARK_TIMEOUT_MS/1000))
-        exit_request = True
+        exit_request_checkport = True
         n['latency'] = httping()
         p.send_signal(SIGINT)
         p.wait()

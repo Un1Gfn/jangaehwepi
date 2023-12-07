@@ -22,7 +22,7 @@ run.frontend:
 	cd frontend; python -m http.server -b 127.0.0.1 6080 >/dev/null 2>&1
 
 run.backend:
-	if pgrep trojan; then false; else true; fi
+	if pgrep trojan sslocal ss-local; then false; else true; fi
 	cd backend; ./main.py
 
 httping.Darwin:

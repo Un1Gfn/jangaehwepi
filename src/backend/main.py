@@ -67,6 +67,7 @@ class BackendHTTPRequestHandler(BaseHTTPRequestHandler):
         self.mfd()
         if storage.storage['active'] >= 0:
             proxy.deactivate()
+        benchmark.exit_request_benchmark = True
         storage.storage_from_clash()
         storage.storage_save()
         self.success()
@@ -112,7 +113,7 @@ class BackendHTTPRequestHandler(BaseHTTPRequestHandler):
                 self.wfile.write(json.dumps(storage.list()).encode())
 
             case "/g_benchmark":
-                if 1 != benchmark.benchmarking:
+                if benchmark.benchmarking != 1:
                     Thread(target=benchmark.benchmark).start()
                 print()
                 self.success()

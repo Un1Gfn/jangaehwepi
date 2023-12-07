@@ -48,27 +48,28 @@ def storage_from_clash():
     global storage
     storage['nodes'] = [ ]
     with open("default.json", 'r') as f:
-        default_conf = json.load(f)
-        default_conf['local_addr'] = SOCKS5_ADDR
-        default_conf['local_port'] = SOCKS5_PORT
+        default_trojan = json.load(f)
+        default_trojan['local_addr'] = SOCKS5_ADDR
+        default_trojan['local_port'] = SOCKS5_PORT
     with open("clash.yaml", "r") as f:
         from_yaml = YAML().load(f)
     id = 0
     for p in from_yaml['proxies']:
-        n = {
-            'name': "",
-            'latency': benchmark.PLACEHOLDER_NOT_TESTED_YET,
-            'type': "",
-            'conf': deepcopy(default_conf)
-        }
         id += 1
 
+        n = {
+            'name': "",
+            'type': "",
+            'latency': benchmark.PLACEHOLDER_NOT_TESTED_YET,
+            'conf': {},
+        }
         assert 'type' in p
 
         match p['type']:
 
             case "trojan":
                 n['type'] = "trojan"
+                n['conf'] = deepcopy(default_trojan)
                 for k, v in p.items():
                     match k:
                         case 'type':             assert v == "trojan"
@@ -76,9 +77,9 @@ def storage_from_clash():
                         case 'udp':              assert v == True
                         case 'alpn':             assert str(v) == "['h2', 'http/1.1']"
                         case 'name':             n['name'] = v
-                        case 'server':           n['conf']['mjm3lo_ip'] = v
-                        case 'port':             n['conf']['mjm3lo_port'] = v
-                        case 'password':         n['conf']['mjm3lo_secret'] = [ v ]
+                        case 'server':           n['conf']['remote_addr'] = v
+                        case 'port':             n['conf']['remote_port'] = v
+                        case 'password':         n['conf']['password'] = [ v ]
                         case _:                  print(f"unknown field ['{k}']: \"{v}\""); raise RuntimeError
 
             case "ss":
@@ -89,9 +90,9 @@ def storage_from_clash():
                         case 'type':     assert "ss" == v
                         case 'udp':      assert v == True
                         case 'name':     n['name'] = v
-                        case 'server':   n['conf']['mjm3lo_ip'] = v
-                        case 'port':     n['conf']['mjm3lo_port'] = v
-                        case 'password': n['conf']['mjm3lo_secret'] = v
+                        case 'server':   n['conf']['server'] = v
+                        case 'port':     n['conf']['server_port'] = v
+                        case 'password': n['conf']['password'] = v
                         case _:          print(f"unknown field ['{k}']: \"{v}\""); raise RuntimeError
 
         storage['nodes'].append(n)
@@ -106,22 +107,25 @@ def list():
     }
     for (id, n) in enumerate(storage['nodes']):
         row = [ id, n['name'], n['latency'] ]
-        if not is_blacklisted(n['conf']):
+        if not is_blacklisted(n):
             d['list1'].append(row)
         else:
             d['list2'].append(row)
     return d
 
-def is_blacklisted(c):
-    return any([ c.items() >= b.items() for b in blacklist ])
+def is_blacklisted(n):
+    c = n['conf']
+    match n['type']:
+        case 'trojan': return any([ ( c['remote_addr'], c['remote_port'] ) == ( b['canonical_ip'], b['canonical_port'] ) for b in blacklist ])
+        case 'ss':     return any([ ( c['server'],      c['server_port'] ) == ( b['canonical_ip'], b['canonical_port'] ) for b in blacklist ])
 
 # g_ban
 def blacklist_append(id):
-    c = storage['nodes'][id]['conf']
-    blacklist.append({
-        'mjm3lo_ip': c['mjm3lo_ip'],
-        'mjm3lo_port': c['mjm3lo_port']
-    })
+    n = storage['nodes'][id]
+    c = n['conf']
+    match n['type']:
+        case 'trojan': blacklist.append({ 'canonical_ip': c['remote_addr'], 'canonical_port': c['remote_port'] })
+        case 'ss':     blacklist.append({ 'canonical_ip': c['server'],      'canonical_port': c['server_port'] })
     blacklist_save()
 
 # g_allow
