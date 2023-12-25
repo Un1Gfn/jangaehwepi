@@ -43,7 +43,8 @@ $(document).ready(function(){
   };
 
   // yaml download url
-  id("id_yaml").href = SUBSCRIPTION;
+  id("id_dler").href = SUBSCRIPTION_DLER;
+  id("id_ssrcloud").href = SUBSCRIPTION_SSRCLOUD;
 
   id("id_update").onclick = function(){
 

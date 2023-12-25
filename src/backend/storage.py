@@ -130,8 +130,12 @@ def blacklist_append(id):
 
 # g_allow
 def blacklist_remove(id):
-    c = storage['nodes'][id]['conf']
-    blacklist[:] = [ b for b in blacklist if not b.items() <= c.items() ]
+    n = storage['nodes'][id]
+    c = n['conf']
+    blacklist[:] = [ b for b in blacklist
+        if  not ( n['type'] == 'trojan' and b['canonical_ip']==c['remote_addr'] and b['canonical_port']==c['remote_port'] )
+        and not ( n['type'] == 'ss'     and b['canonical_ip']==c['server']      and b['canonical_port']==c['server_port'] )
+    ]
     blacklist_save()
 
 # g_upload [2/2]

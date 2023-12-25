@@ -12,8 +12,11 @@ lnk*js
 *.ico
 
 active.json
+benchmark.json
+
 blacklist.json
 storage.json
 *.so
 *.dylib
 *.pyc
+
