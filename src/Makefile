@@ -21,9 +21,13 @@ prep:
 run.frontend:
 	cd frontend; python -m http.server -b 127.0.0.1 6080 >/dev/null 2>&1
 
+
+# python -m venv venv
+# source venv/bin/activate
+# pip3 install python-multipart ruamel.yaml
 run.backend:
 	if pgrep trojan sslocal ss-local; then false; else true; fi
-	cd backend; ./main.py
+	source venv/bin/activate; cd backend; ./main.py
 
 httping.Darwin:
 	cd backend; gcc \
