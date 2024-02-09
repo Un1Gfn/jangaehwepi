@@ -71,6 +71,7 @@ int64_t ff(const char *const url, const char *const proxy, const long timeout_ms
     case CURLE_COULDNT_CONNECT:    fprintf(stderr, "CURLE_COULDNT_CONNECT\n");
     case CURLE_GOT_NOTHING:        fprintf(stderr, "CURLE_GOT_NOTHING\n");
     case CURLE_OPERATION_TIMEDOUT: fprintf(stderr, "CURLE_OPERATION_TIMEDOUT\n");
+    case CURLE_SEND_ERROR:         fprintf(stderr, "CURLE_SEND_ERROR\n");
       return -1LL*n;
       break;
 
