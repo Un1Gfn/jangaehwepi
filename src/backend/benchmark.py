@@ -101,7 +101,8 @@ def benchmark():
         n['latency'] = PLACEHOLDER_NOT_TESTED_YET
     print()
 
-    l = list(range(len(storage.storage['nodes'])))
+    length = len(storage.storage['nodes'])
+    l = list(range(length))
     shuffle(l)
     wait_until_avail()
 
@@ -115,15 +116,16 @@ def benchmark():
 
         n = storage.storage['nodes'][id]
         c = n['conf']
+        header = f"[{index + 1}/{length}] #{id} {n['name']}\n"
         if storage.is_blacklisted(n):
-            print(f"[{index + 1}/{len(l)}] #{index} {n['name']}\nbanned\n")
+            print(f"{header}banned\n")
             continue
         else:
             match n['type']:
                 case 'trojan':
-                    print(f"[{index + 1}/{len(l)}] #{index} {n['name']}\n127.0.0.1:{BENCHMARK_PORT} => {c['remote_addr']}:{c['remote_port']}")
+                    print(f"{header}127.0.0.1:{BENCHMARK_PORT} => {c['remote_addr']}:{c['remote_port']}")
                 case 'ss':
-                    print(f"[{index + 1}/{len(l)}] #{index} {n['name']}\n127.0.0.1:{BENCHMARK_PORT} => {c['server']}:{c['server_port']}")
+                    print(f"{header}127.0.0.1:{BENCHMARK_PORT} => {c['server']}:{c['server_port']}")
 
         match n['type']:
             case 'trojan':
